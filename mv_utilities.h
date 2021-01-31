@@ -2,109 +2,33 @@
 
 namespace mv
 {
-    namespace cvTools
+    void naiveShow(cv::Mat& img, int delay = 10)
     {
-        void naiveShow(cv::Mat& img, int delay = 10)
-        {
-            cv::imshow("Image", img);
-            cv::waitKey(delay);
-        }
-    }
-
-    namespace spinnaker
-    {
-        void standardSetup(Spinnaker::CameraPtr pCam)
-        {
-            Spinnaker::GenApi::INodeMap& nodeMap = pCam->GetNodeMap();
-
-            Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
-            if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode))
-            {
-                std::cout << "Unable to set acquisition mode to continuous (enum retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-            if (!IsAvailable(ptrAcquisitionModeContinuous) || !IsReadable(ptrAcquisitionModeContinuous))
-            {
-                std::cout << "Unable to set acquisition mode to continuous (entry retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            const int64_t acquisitionModeContinuous = ptrAcquisitionModeContinuous->GetValue();
-
-            ptrAcquisitionMode->SetIntValue(acquisitionModeContinuous);
-
-            Spinnaker::GenApi::CEnumerationPtr ptrTriggerMode = nodeMap.GetNode("TriggerMode");
-            if (!Spinnaker::GenApi::IsAvailable(ptrTriggerMode) || !Spinnaker::GenApi::IsReadable(ptrTriggerMode))
-            {
-                std::cout << "Unable to set acquisition mode to continuous (entry retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrTriggerModeOff = ptrTriggerMode->GetEntryByName("Off");
-            if (!Spinnaker::GenApi::IsAvailable(ptrTriggerModeOff) || !Spinnaker::GenApi::IsReadable(ptrTriggerModeOff))
-            {
-                std::cout << "Unable to set acquisition mode to continuous (entry retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            ptrTriggerMode->SetIntValue(ptrTriggerModeOff->GetValue());
-
-            Spinnaker::GenApi::INodeMap& sNodeMap = pCam->GetTLStreamNodeMap();
-
-            Spinnaker::GenApi::CEnumerationPtr ptrHandlingMode = sNodeMap.GetNode("StreamBufferHandlingMode");
-            if (!Spinnaker::GenApi::IsAvailable(ptrHandlingMode) || !Spinnaker::GenApi::IsWritable(ptrHandlingMode))
-            {
-                std::cout << "Unable to get stream buffer handling mode. Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrHandlingModeEntry = ptrHandlingMode->GetCurrentEntry();
-            if (!Spinnaker::GenApi::IsAvailable(ptrHandlingModeEntry) || !Spinnaker::GenApi::IsReadable(ptrHandlingModeEntry))
-            {
-                std::cout << "Unable to get current stream buffer handling mode. Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            // Set stream buffer Count Mode to manual
-            Spinnaker::GenApi::CEnumerationPtr ptrStreamBufferCountMode = sNodeMap.GetNode("StreamBufferCountMode");
-            if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountMode) || !Spinnaker::GenApi::IsWritable(ptrStreamBufferCountMode))
-            {
-                std::cout << "Unable to set Buffer Count Mode (node retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrStreamBufferCountModeManual = ptrStreamBufferCountMode->GetEntryByName("Manual");
-            if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountModeManual) || !Spinnaker::GenApi::IsReadable(ptrStreamBufferCountModeManual))
-            {
-                std::cout << "Unable to set Buffer Count Mode entry (Entry retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            ptrStreamBufferCountMode->SetIntValue(ptrStreamBufferCountModeManual->GetValue());
-
-            // Retrieve and modify Stream Buffer Count
-            Spinnaker::GenApi::CIntegerPtr ptrBufferCount = sNodeMap.GetNode("StreamBufferCountManual");
-            if (!Spinnaker::GenApi::IsAvailable(ptrBufferCount) || !Spinnaker::GenApi::IsWritable(ptrBufferCount))
-            {
-                std::cout << "Unable to set Buffer Count (Integer node retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
-
-            ptrBufferCount->SetValue(5);
-
-            ptrHandlingModeEntry = ptrHandlingMode->GetEntryByName("NewestOnly");
-            ptrHandlingMode->SetIntValue(ptrHandlingModeEntry->GetValue());
-        }
+        cv::imshow("Image", img);
+        cv::waitKey(delay);
     }
 
     namespace calibration
     {
-        struct calibration
+
+        class calibration
         {
+        private:
+            /* data */
+        public:
             cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
-            cv::Mat distCoeffs = cv::Mat(1, 5, CV_64F);
+            cv::Mat distCoeffs;
+
+            calibration()
+            {
+                this->distCoeffs = cv::Mat(1, 5, CV_64F);
+            }
+            ~calibration() {}
+
+            calibration(int distCoeffsWidth)
+            {
+                this->distCoeffs = cv::Mat(1,distCoeffsWidth, CV_64F);
+            }
         };
 
         cv::Mat idealDistCoeffs = cv::Mat::zeros(1, 5, CV_64F);
@@ -124,7 +48,7 @@ namespace mv
             return ideal;
         }
         
-        calibration loadCalibration(std::string sn = "")
+        calibration loadCalibration(std::string root, std::string model, std::string id, std::string lens)
         {
             std::vector<std::vector<double>> cameraMatrix_vector;
             std::vector<double> distCoeffs_vector;
@@ -132,11 +56,11 @@ namespace mv
             std::ifstream cameraMatrix_csv;
             std::ifstream distCoeffs_csv;
 
-            if (sn == "")
-            {
-                cameraMatrix_csv.open("/home/finn/camera_calibrations/cameraMatrix.csv");
-                distCoeffs_csv.open("/home/finn/camera_calibrations/distCoeffs.csv");   
-            }
+            std::string cameraMatrix_csv_path = root + "/" + model + "-" + id + "/" + lens + "/cameraMatrix.csv";
+            std::string distCoeffs_csv_path = root + "/" + model + "-" + id + "/" + lens + "/distCoeffs.csv";
+
+            cameraMatrix_csv.open(cameraMatrix_csv_path);
+            distCoeffs_csv.open(distCoeffs_csv_path);   
 
             std::string cameraMatrix_row, cameraMatrix_column;
             
