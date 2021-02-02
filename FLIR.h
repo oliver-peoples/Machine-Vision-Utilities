@@ -64,7 +64,7 @@ namespace flir
 
     namespace spinnaker
     {
-        void standardSetup_ManualBuffer(Spinnaker::CameraPtr pCam, int buffer_size=5)
+        void standardSetup_ManualBuffer(Spinnaker::CameraPtr& pCam, int buffer_size=5)
         {
             Spinnaker::GenApi::INodeMap& nodeMap = pCam->GetNodeMap();
 
@@ -147,6 +147,43 @@ namespace flir
 
             ptrHandlingModeEntry = ptrHandlingMode->GetEntryByName("NewestOnly");
             ptrHandlingMode->SetIntValue(ptrHandlingModeEntry->GetValue());
+        }
+
+        std::string getModel(Spinnaker::GenApi::INodeMap& nodeMapTLDevice)
+        {
+            Spinnaker::GenICam::gcstring deviceModel("");
+            Spinnaker::GenApi::CStringPtr ptrStringSerial = nodeMapTLDevice.GetNode("DeviceModelName");
+            deviceModel = ptrStringSerial->GetValue();
+
+            std::string deviceModelString = deviceModel.c_str();
+
+            std::string::iterator end_pos = std::remove(deviceModelString.begin(), deviceModelString.end(), ' ');
+            deviceModelString.erase(end_pos, deviceModelString.end());
+
+            return deviceModelString;
+        }
+
+        std::string getId(Spinnaker::GenApi::INodeMap& nodeMapTLDevice)
+        {
+            Spinnaker::GenICam::gcstring deviceID("");
+            Spinnaker::GenApi::CStringPtr ptrStringSerial = nodeMapTLDevice.GetNode("DeviceSerialNumber");
+            deviceID = ptrStringSerial->GetValue();
+
+            std::string id = std::string(deviceID.c_str()).substr(0,2);
+            id += std::string(deviceID.c_str()).substr(std::string(deviceID.c_str()).length() - 2);
+
+            return id;
+        }
+
+        cv::Size getResolution(Spinnaker::CameraPtr& pCam)
+        {
+            Spinnaker::GenApi::CIntegerPtr ptrIntegerWidth = pCam->GetNodeMap().GetNode("Width");
+            Spinnaker::GenApi::CIntegerPtr ptrIntegerHeight = pCam->GetNodeMap().GetNode("Height");
+
+            int64_t image_width = ptrIntegerWidth->GetValue();
+            int64_t image_height = ptrIntegerHeight->GetValue();
+
+            return cv::Size(image_width, image_height);
         }
     }
 }

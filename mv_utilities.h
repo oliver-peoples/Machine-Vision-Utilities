@@ -2,6 +2,14 @@
 
 namespace mv
 {
+    const char quit_character = 'q';
+    const char save = 's';
+
+    namespace lenses
+    {
+        const std::string lens_EO86900 = "EO86900";
+    }
+
     void naiveShow(cv::Mat& img, int delay = 10)
     {
         cv::imshow("Image", img);
@@ -48,7 +56,7 @@ namespace mv
             return ideal;
         }
         
-        calibration loadCalibration(std::string root, std::string model, std::string id, std::string lens)
+        calibration loadCalibration(std::string root)
         {
             std::vector<std::vector<double>> cameraMatrix_vector;
             std::vector<double> distCoeffs_vector;
@@ -56,8 +64,8 @@ namespace mv
             std::ifstream cameraMatrix_csv;
             std::ifstream distCoeffs_csv;
 
-            std::string cameraMatrix_csv_path = root + "/" + model + "-" + id + "/" + lens + "/cameraMatrix.csv";
-            std::string distCoeffs_csv_path = root + "/" + model + "-" + id + "/" + lens + "/distCoeffs.csv";
+            std::string cameraMatrix_csv_path = root + "cameraMatrix.csv";
+            std::string distCoeffs_csv_path = root + "distCoeffs.csv";
 
             cameraMatrix_csv.open(cameraMatrix_csv_path);
             distCoeffs_csv.open(distCoeffs_csv_path);   
