@@ -164,20 +164,25 @@ namespace mv
 
         hmath::Quaternion quaternionFromRVEC(cv::Vec3d rvec)
         {
-            double thetaOn2 = cvVec3dNorm(rvec) / 2;
-            hmath::Vector3 rvec_normed = cvVec3dNormalized(rvec);
-            
+            double theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
+            hmath::Vector3 axis(rvec[0], rvec[1], rvec[2]);
 
-            return hmath::Quaternion(cos(thetaOn2), sin(thetaOn2) * rvec_normed.i, sin(thetaOn2) * rvec_normed.j, sin(thetaOn2) * rvec_normed.k);
+            return hmath::Quaternion(axis, theta);
         }
 
         cv::Vec3d quaternionToRVEC(hmath::Quaternion q)
         {
-            hmath::Vector3 axis = q.getVectorComponent();
-            axis.normalize();
-            axis *= (2 * acos(q.w));
-
-            return cv::Vec3d(axis.i, axis.j, axis.k);
+            q.normalize();
+            double angle = 2 * acos(q.w);
+            double s = sqrt(1 - q.w * q.w);
+            if (s < 0.00001)
+            {
+                return cv::Vec3d(q.i, q.j, q.k);
+            }
+            else
+            {
+                return cv::Vec3d(q.i / s, q.j / s, q.k / s);
+            }
         }
 
         hmath::DualQuaternion dualQuaternionFromRVEC_TVEC(cv::Vec3d rvec, cv::Vec3d tvec)
