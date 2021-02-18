@@ -1,4 +1,8 @@
-
+#include <sstream>
+#include <hmath.h>
+#include <istream>
+#include <fstream>
+#include <ostream>
 
 namespace mv
 {
