@@ -1,5 +1,5 @@
 #include <sstream>
-#include <hmath.h>
+#include <hmath.hpp>
 #include <istream>
 #include <fstream>
 #include <ostream>

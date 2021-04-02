@@ -118,32 +118,32 @@ namespace flir
                 exit(EXIT_FAILURE);
             }
 
-            // Set stream buffer Count Mode to manual
-            Spinnaker::GenApi::CEnumerationPtr ptrStreamBufferCountMode = sNodeMap.GetNode("StreamBufferCountMode");
-            if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountMode) || !Spinnaker::GenApi::IsWritable(ptrStreamBufferCountMode))
-            {
-                std::cout << "Unable to set Buffer Count Mode (node retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            // // Set stream buffer Count Mode to manual
+            // Spinnaker::GenApi::CEnumerationPtr ptrStreamBufferCountMode = sNodeMap.GetNode("StreamBufferCountMode");
+            // if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountMode) || !Spinnaker::GenApi::IsWritable(ptrStreamBufferCountMode))
+            // {
+            //     std::cout << "Unable to set Buffer Count Mode (node retrieval). Aborting..." << std::endl << std::endl;
+            //     exit(EXIT_FAILURE);
+            // }
 
-            Spinnaker::GenApi::CEnumEntryPtr ptrStreamBufferCountModeManual = ptrStreamBufferCountMode->GetEntryByName("Manual");
-            if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountModeManual) || !Spinnaker::GenApi::IsReadable(ptrStreamBufferCountModeManual))
-            {
-                std::cout << "Unable to set Buffer Count Mode entry (Entry retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            // Spinnaker::GenApi::CEnumEntryPtr ptrStreamBufferCountModeManual = ptrStreamBufferCountMode->GetEntryByName("Manual");
+            // if (!Spinnaker::GenApi::IsAvailable(ptrStreamBufferCountModeManual) || !Spinnaker::GenApi::IsReadable(ptrStreamBufferCountModeManual))
+            // {
+            //     std::cout << "Unable to set Buffer Count Mode entry (Entry retrieval). Aborting..." << std::endl << std::endl;
+            //     exit(EXIT_FAILURE);
+            // }
 
-            ptrStreamBufferCountMode->SetIntValue(ptrStreamBufferCountModeManual->GetValue());
+            // ptrStreamBufferCountMode->SetIntValue(ptrStreamBufferCountModeManual->GetValue());
 
-            // Retrieve and modify Stream Buffer Count
-            Spinnaker::GenApi::CIntegerPtr ptrBufferCount = sNodeMap.GetNode("StreamBufferCountManual");
-            if (!Spinnaker::GenApi::IsAvailable(ptrBufferCount) || !Spinnaker::GenApi::IsWritable(ptrBufferCount))
-            {
-                std::cout << "Unable to set Buffer Count (Integer node retrieval). Aborting..." << std::endl << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            // // Retrieve and modify Stream Buffer Count
+            // Spinnaker::GenApi::CIntegerPtr ptrBufferCount = sNodeMap.GetNode("StreamBufferCountManual");
+            // if (!Spinnaker::GenApi::IsAvailable(ptrBufferCount) || !Spinnaker::GenApi::IsWritable(ptrBufferCount))
+            // {
+            //     std::cout << "Unable to set Buffer Count (Integer node retrieval). Aborting..." << std::endl << std::endl;
+            //     exit(EXIT_FAILURE);
+            // }
 
-            ptrBufferCount->SetValue(buffer_size);
+            // ptrBufferCount->SetValue(buffer_size);
 
             ptrHandlingModeEntry = ptrHandlingMode->GetEntryByName("NewestOnly");
             ptrHandlingMode->SetIntValue(ptrHandlingModeEntry->GetValue());
