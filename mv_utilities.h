@@ -20,6 +20,50 @@ namespace mv
         cv::waitKey(delay);
     }
 
+    namespace utils
+    {
+        struct Corners
+        {
+            cv::Point2f tl, tr, bl, br;
+
+            Corners(cv::Mat& source_img)
+            {
+                this->tl.x = 0;
+                this->tl.y = 0;
+
+                this->tr.x = source_img.size().width;
+                this->tr.y = 0;
+
+                this->bl.x = 0;
+                this->bl.y = source_img.size().height;
+
+                this->br.x = source_img.size().width;
+                this->br.y = source_img.size().height;
+            }
+
+            Corners(cv::Point2f tl, cv::Point2f tr, cv::Point2f bl, cv::Point2f br)
+            {
+                this->tl = tl;
+                this->tr = tr;
+                this->bl = bl;
+                this->br = br;
+            }
+
+            std::vector<cv::Point2f> getVector()
+            {
+                std::vector<cv::Point2f> corners;
+
+                corners.push_back(this->tl);
+                corners.push_back(this->tr);
+                corners.push_back(this->bl);
+                corners.push_back(this->br);
+
+                return corners;
+            }
+        };
+        
+    }
+
     namespace calibration
     {
 
@@ -147,7 +191,7 @@ namespace mv
             return d1_rounded >= d2_rounded;
         }
 
-        bool d_approx_lte(double d1, double d2, int power=8)
+        bool d_approx_lt(double d1, double d2, int power=8)
         {
             int d1_rounded = round(d1 * pow(10, power));
             int d2_rounded = round(d2 * pow(10, power));
@@ -155,7 +199,7 @@ namespace mv
             return d1_rounded < d2_rounded;
         }
 
-        bool d_approx_gte(double d1, double d2, int power=8)
+        bool d_approx_gt(double d1, double d2, int power=8)
         {
             int d1_rounded = round(d1 * pow(10, power));
             int d2_rounded = round(d2 * pow(10, power));
