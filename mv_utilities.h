@@ -139,6 +139,30 @@ namespace mv
             return d1_rounded <= d2_rounded;
         }
 
+        bool d_approx_gte(double d1, double d2, int power=8)
+        {
+            int d1_rounded = round(d1 * pow(10, power));
+            int d2_rounded = round(d2 * pow(10, power));
+
+            return d1_rounded >= d2_rounded;
+        }
+
+        bool d_approx_lte(double d1, double d2, int power=8)
+        {
+            int d1_rounded = round(d1 * pow(10, power));
+            int d2_rounded = round(d2 * pow(10, power));
+
+            return d1_rounded < d2_rounded;
+        }
+
+        bool d_approx_gte(double d1, double d2, int power=8)
+        {
+            int d1_rounded = round(d1 * pow(10, power));
+            int d2_rounded = round(d2 * pow(10, power));
+
+            return d1_rounded > d2_rounded;
+        }
+
         hmath::Vector3 h_xAxis(1,0,0);
         hmath::Vector3 h_yAxis(0,1,0);
         hmath::Vector3 h_zAxis(0,0,1);
@@ -151,34 +175,34 @@ namespace mv
             return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
         }
 
-        hmath::Vector3 cvVec3dNormalized(cv::Vec3d v)
+        template <typename v_T> hmath::Vector3<v_T> cvVec3dNormalized(cv::Vec3d v)
         {
-            return hmath::Vector3(v[0], v[1], v[2], hmath::NORMED);
+            return hmath::Vector3<v_T>(v[0], v[1], v[2], hmath::NORMED);
         }
 
-        hmath::Vector3 cvVec3d2hmath(cv::Vec3d v)
+        template <typename v_T> hmath::Vector3<v_T> cvVec3d2hmath(cv::Vec3d v)
         {
-            return hmath::Vector3(v[0], v[1], v[2]);
+            return hmath::Vector3<v_T>(v[0], v[1], v[2]);
         }
 
-        hmath::Quaternion getTTPrimeMappingQuaternion(hmath::Quaternion T, hmath::Quaternion TPrime)
+        template <typename q_T> hmath::Quaternion<q_T> getTTPrimeMappingQuaternion(hmath::Quaternion<q_T> T, hmath::Quaternion<q_T> TPrime)
         {
             return T.getInverse() * TPrime;
         }
 
-        hmath::Quaternion quaternionFromRVEC(cv::Vec3d rvec)
+        template <typename q_T> hmath::Quaternion<q_T> quaternionFromRVEC(cv::Vec3d rvec)
         {
-            double theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
-            hmath::Vector3 axis(rvec[0], rvec[1], rvec[2]);
+            q_T theta = sqrt(rvec[0] * rvec[0] + rvec[1] * rvec[1] + rvec[2] * rvec[2]);
+            hmath::Vector3<q_T> axis(rvec[0], rvec[1], rvec[2]);
 
-            return hmath::Quaternion(axis, theta);
+            return hmath::Quaternion<q_T>(axis, theta);
         }
 
-        cv::Vec3d quaternionToRVEC(hmath::Quaternion q)
+        template <typename q_T> cv::Vec3d quaternionToRVEC(hmath::Quaternion<q_T> q)
         {
             q.normalize();
-            double angle = 2 * acos(q.w);
-            double s = sqrt(1 - q.w * q.w);
+            q_T angle = 2 * acos(q.w);
+            q_T s = sqrt(1 - q.w * q.w);
             if (s < 0.00001)
             {
                 return cv::Vec3d(q.i, q.j, q.k);
@@ -189,12 +213,12 @@ namespace mv
             }
         }
 
-        hmath::DualQuaternion dualQuaternionFromRVEC_TVEC(cv::Vec3d rvec, cv::Vec3d tvec)
-        {
-            hmath::Vector3 translation(tvec[0], tvec[1], tvec[2]);
-            hmath::Quaternion rotation = quaternionFromRVEC(rvec);
+        // hmath::DualQuaternion dualQuaternionFromRVEC_TVEC(cv::Vec3d rvec, cv::Vec3d tvec)
+        // {
+        //     hmath::Vector3 translation(tvec[0], tvec[1], tvec[2]);
+        //     hmath::Quaternion rotation = quaternionFromRVEC(rvec);
 
-            return hmath::DualQuaternion(rotation, translation);
-        }
+        //     return hmath::DualQuaternion(rotation, translation);
+        // }
     }
 }
